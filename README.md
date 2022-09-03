@@ -1,49 +1,333 @@
-# API Development and Documentation Final Project
+# LE PROJET TRIVIA-API
 
-## Trivia App
+Le projet Trivia est une plate-forme de jeux pour les étudiants et les employers d'Udacity, afin de favoriser la creation des liens sociaux entre ces derniers. Les utilisateurs de la plate-forme peuvent afficher toutes les questions par catégorie, ajouter de nouvelles questions en exigeant qu'elles comprennent le texte de la question et de la réponse, supprimer les question, rechercher des questions à partir d'une chaîne de texte de requête et enfin jouer le questionnaire en randomisant toutes les questions ou dans une catégorie spécifique. Dans le cadre du Nanodegré Fullstack, il sert de projet pratique de fin de  module  pour les leçons du Cours 2 : Développement et documentation des API. En réalisant ce projet, j'apprends et applique mes compétences en conception et en mise en œuvre des points de terminaison d'API bien formatés qui tirent parti des connaissances de HTTP et des meilleures pratiques de développement d'API.
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+Tout le code backend suit [PEP8 style guidelines](https://www.python.org/dev/peps/pep-0008/). 
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+## Pour Commencer
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
+### Pré-requis et Développement local
+Les développeurs qui utilisent ce projet doivent déjà avoir Python3, pip et node installés sur leurs machines locales.
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+### Configuration du backend
 
-## Starting and Submitting the Project
+Depuis le dossier backend, exécutez `pip install requirements.txt`. Tous les paquets requis sont inclus dans le fichier d'exigences. 
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the project repository and [clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
+Pour lancer l'application, exécutez les commandes suivantes : 
+```
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+```
 
-## About the Stack
+Ces commandes mettent l'application en mode développement et dirigent notre application à utiliser le fichier `__init__.py` dans notre dossier flaskr. Le travail en mode développement affiche un débogueur interactif dans la console et redémarre le serveur à chaque fois que des modifications sont apportées. Si vous exécutez localement sous Windows, recherchez les commandes dans la [documentation Flask] (http://flask.pocoo.org/docs/1.0/tutorial/factory/).
 
-We started the full stack application for you. It is designed with some key functional areas:
+L'application est exécutée sur `http://127.0.0.1:5000/` par défaut et est un proxy dans la configuration du frontend. 
 
-### Backend
+### Configuration du Frontend
 
-The [backend](./backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+Depuis le dossier du frontend, exécutez les commandes suivantes pour démarrer le client : 
+```
+npm install // une seule fois pour installer les dépendances
+npm start 
+```
 
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
+Par défaut, le frontend sera exécuté sur localhost:3000.
 
-> View the [Backend README](./backend/README.md) for more details.
+### Tests
+Afin d'exécuter les tests, naviguez dans le dossier backend et exécutez les commandes suivantes : 
 
-### Frontend
+```
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
+python test_flaskr.py
+```
 
-The [frontend](./frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+La première fois que vous exécutez les tests, omettez la commande dropdb. 
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads?
+Tous les tests sont conservés dans ce fichier et doivent être maintenus au fur et à mesure des mises à jour des fonctionnalités de l'application. 
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+## Référence API
 
-1. `frontend/src/components/QuestionView.js`
-2. `frontend/src/components/FormView.js`
-3. `frontend/src/components/QuizView.js`
+### Pour Commencer
+- URL de base : Actuellement, cette application ne peut être exécutée que localement et n'est pas hébergée en tant qu'URL de base. L'application backend est hébergée à l'adresse par défaut, `http://127.0.0.1:5000/`, qui est définie comme un proxy dans la configuration du frontend. 
+- Authentification : Cette version de l'application ne nécessite pas d'authentification ou de clés API. 
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
+### Gestion des erreurs
+Les erreurs sont renvoyées sous forme d'objets JSON au format suivant :
+```
+{
+    "success" : False, 
+    "error" : 404,
+    "message" : "resource not found"
+}
+```
+L'API renvoie deux types d'erreur lorsque les demandes échouent :
+- 404 : resource not found
+- 422 : unprocessable
 
-> View the [Frontend README](./frontend/README.md) for more details.
+### Points de Terminaisons  et Comportements
+
+#### GET /categories
+
+`GET '/categories'`
+
+- Général :
+    - Renvoie un objet avec une seule clé, « categories », qui contient un objet « id : category_string » : paires de valeurs.
+    - Récupère un dictionnaire de catégories dans lequel les clés sont les ID, et la valeur est la chaîne correspondante de la catégorie
+    - Arguments de la requête : aucun
+- Exemple : `curl http://127.0.0.1:5000/categories`
+
+```json 
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }
+}
+```
+
+---
+### GET /categories/${id}/questions
+
+`GET '/questions?page=${integer}'`
+
+-General :
+    - Récupère un ensemble paginé de questions, un nombre total de questions, toutes les catégories et la chaîne de catégorie actuelle.
+    - Arguments de la requête : `page` - nombre entier
+    - Retourne : Un objet contenant 10 questions paginées, le nombre total de questions, l'objet comprenant toutes les catégories et la chaîne de la catégorie actuelle.
+-Exemple : `curl http://127.0.0.1:5000/questions?page=1`
+
+```json
+{
+  "questions": [
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+    {
+      "answer": "Maya Angelou", 
+      "category": 4, 
+      "difficulty": 2, 
+      "id": 5, 
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": 5, 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }, 
+    {
+      "answer": "Muhammad Ali", 
+      "category": 4, 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "Brazil", 
+      "category": 6, 
+      "difficulty": 3, 
+      "id": 10, 
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }, 
+    {
+      "answer": "Uruguay", 
+      "category": 6, 
+      "difficulty": 4, 
+      "id": 11, 
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    }, 
+    {
+      "answer": "George Washington Carver", 
+      "category": 4, 
+      "difficulty": 2, 
+      "id": 12, 
+      "question": "Who invented Peanut Butter?"
+    }, 
+    {
+      "answer": "Lake Victoria", 
+      "category": 3, 
+      "difficulty": 2, 
+      "id": 13, 
+      "question": "What is the largest lake in Africa?"
+    }, 
+    {
+      "answer": "Escher", 
+      "category": 2, 
+      "difficulty": 1, 
+      "id": 16, 
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    }
+  ], 
+  "total_questions": 21,
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": "Science", 
+}
+```
+
+---
+### GET /categories/${id}/questions
+
+`GET '/categories/${id}/questions'`
+
+-Generale : 
+    - Récupère les questions d'une catégorie spécifiée par l'argument de requête id.
+    - Arguments de la requête : `id` - nombre entier
+    - Retourne : Un objet contenant les questions de la catégorie spécifiée, le nombre total de questions et la chaîne de la catégorie actuelle.
+-Exemple : `curl http://127.0.0.1:5000/categories/2/questions`
+```json
+{
+  "current_category": "Geography", 
+  "questions": [
+    {
+      "answer": "Lake Victoria", 
+      "category": 3, 
+      "difficulty": 2, 
+      "id": 13, 
+      "question": "What is the largest lake in Africa?"
+    }, 
+    {
+      "answer": "54", 
+      "category": 3, 
+      "difficulty": 4, 
+      "id": 25, 
+      "question": "le continent Africain compte combien de pays?"
+    }
+  ], 
+  "total_questions": 2
+}
+```
+
+---
+### DELETE /questions/${id}
+
+`DELETE '/questions/${id}'`
+    
+-Generale : 
+    - Supprime une question spécifiée en utilisant l'identifiant de la question.
+    - Arguments de la requête : `id` - nombre entier
+    - Retourne : l'identifiant de l'objet supprimé
+-Exemple : `curl -X DELETE http://127.0.0.1:5000/questions/10`
+```json
+{
+  "deleted": 10
+}
+```
+
+---
+
+### POST /quizzes
+
+`POST '/quizzes'`
+
+-Generale : 
+    - Envoie une requête post afin d'obtenir la question suivante pendent une session de jeux
+    - Retourne un objet unique contenant une question (la prochaine question du jeux)
+    
+    
+-Exemple : `curl -H "Content-Type: application/json" -X POST -d '{"previous_questions":[1,3], "quiz_category" : {"type": "Science", "id": "3" }}' http://localhost:5000/quizzes`
+
+```json
+{
+  "question": {
+    "answer": "Lake Victoria", 
+    "category": 3, 
+    "difficulty": 2, 
+    "id": 13, 
+    "question": "What is the largest lake in Africa?"
+  }
+}
+```
+---
+### POST /questions
+
+`POST '/questions'`
+
+-Generale : 
+    - Dans le cas ou le coprs de la requête contient `Un objet question` Envoie une requête de post afin d'ajouter une nouvelle question
+    - retourne : Aucune nouvelle donnée
+    -Corps de la requête : 
+```json
+{
+  "question": "Heres a new question string",
+  "answer": "Heres a new answer string",
+  "difficulty": 1,
+  "category": 3
+}
+```
+-Exemple : `curl -H "Content-Type: application/json" -X POST -d '{"question": "Heres a new question string","answer": "Heres a new answer string","difficulty": 1, "category": 3}' http://localhost:5000/questions`
+
+```json
+{
+
+}
+```
+----
+`POST '/questions'`
+
+-Generale : 
+    - Dans le cas ou le corps de la requête contien `searchTerm`, envoi d'une requête de poste afin de rechercher une question spécifique par terme de recherche
+    - Corps de la requête :
+```json
+{
+  "searchTerm": "this is the term the user is looking for"
+}
+```
+    -Retourne : un tableau de questions, un nombre de totalQuestions correspondant au terme de recherche et la chaîne de catégorie actuelle.
+
+-Exemple : `curl -H "Content-Type: application/json" -X POST -d '{"searchTerm": "title"}' http://localhost:5000/questions`
+
+```json
+{
+  "current_category": "Science", 
+  "questions": [
+    {
+      "answer": "Maya Angelou", 
+      "category": 4, 
+      "difficulty": 2, 
+      "id": 5, 
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": 5, 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }
+  ], 
+  "total_questions": 2
+}
+```
+## Deployment N/A
+
+## Authors
+CHEDJOU SOFFO Rocelin
+
+## Acknowledgements 
+L'équipe formidable d'Udacity et tous les étudiants. Particulierement à mon session lead BADIOU OURO-BANG'NA

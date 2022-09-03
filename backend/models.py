@@ -1,10 +1,16 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
+#ici nous chargons le mot de passe de ma base de donnée dans notre fichier .env
+DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
+DATABASE_PASSWORD="123456789"
 database_name = 'trivia'
-database_path = 'postgresql://{}/{}'.format('localhost:5432', database_name)
+database_path = "postgresql://{}:{}@{}/{}".format(
+    "postgres", DATABASE_PASSWORD, "localhost:5432", database_name
+)
 
 db = SQLAlchemy()
 
@@ -13,6 +19,7 @@ setup_db(app)
     binds a flask application and a SQLAlchemy service
 """
 def setup_db(app, database_path=database_path):
+    # print(database_path)
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
@@ -29,7 +36,8 @@ class Question(db.Model):
     id = Column(Integer, primary_key=True)
     question = Column(String)
     answer = Column(String)
-    category = Column(String)
+    # category = Column(String)
+    category = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     difficulty = Column(Integer)
 
     def __init__(self, question, answer, category, difficulty):
@@ -67,6 +75,7 @@ class Category(db.Model):
 
     id = Column(Integer, primary_key=True)
     type = Column(String)
+    questions = db.relationship('Question', backref='categories', lazy=True)
 
     def __init__(self, type):
         self.type = type
@@ -76,3 +85,7 @@ class Category(db.Model):
             'id': self.id,
             'type': self.type
             }
+    def format_id(self):
+        return '{0}'.format(self.id)
+    def format_type(self):
+        return '{0}'.format(self.type)

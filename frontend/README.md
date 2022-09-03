@@ -4,7 +4,7 @@
 
 > _tip_: this frontend is designed to work with [Flask-based Backend](../backend) so it will not load successfully if the backend is not working or not connected. We recommend that you **stand up the backend first**, test using Postman or curl, update the endpoints in the frontend, and then the frontend should integrate smoothly.
 
-### Installing Dependencies
+### Installing Dependencies 
 
 1. **Installing Node and NPM**
    This project depends on Nodejs and Node Package Manager (NPM). Before continuing, you must download and install Node (the download includes NPM) from [https://nodejs.com/en/download](https://nodejs.org/en/download/).
@@ -156,10 +156,10 @@ You can optionally update this game play to increase the number of questions or 
 - Request Body:
 
 ```json
-{
-    'previous_questions': [1, 4, 20, 15]
+  {
+    'previous_questions': [1, 4, 20, 15],
     quiz_category': 'current category'
- }
+  }
 ```
 
 - Returns: a single new question object
