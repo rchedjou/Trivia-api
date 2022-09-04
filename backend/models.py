@@ -1,15 +1,12 @@
-import os
-from dotenv import load_dotenv
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
+from settings import  DB_NAME, DB_USER, DB_PASSWORD
 
 #ici nous chargons le mot de passe de ma base de donnée dans notre fichier .env
-DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
-DATABASE_PASSWORD="123456789"
-database_name = 'trivia'
+
 database_path = "postgresql://{}:{}@{}/{}".format(
-    "postgres", DATABASE_PASSWORD, "localhost:5432", database_name
+    DB_USER, DB_PASSWORD, "localhost:5432", DB_NAME
 )
 
 db = SQLAlchemy()
